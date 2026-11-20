@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.contrib.auth import authenticate, login, logout
-from django.db import connection, transaction
+from django.db import transaction
 from django.middleware.csrf import get_token
 from django.utils.timezone import now
 

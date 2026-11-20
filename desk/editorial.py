@@ -100,3 +100,10 @@ def approve(request,data,pk):
     draft.save(update_fields=["approved"])
     audit(request.user,"revision.approve",rev)
     return {"approved":base}
+
+@endpoint('GET')
+def overview(request,data):
+    from .models import Source
+    return {'sources':Source.objects.count(),'topics':Topic.objects.count(),'drafts':Draft.objects.count(),
+            'review':Draft.objects.filter(version__gt=0,approved=None).count(),
+            'recent':list(Draft.objects.order_by('-id').values('id','topic__title','version')[:8])}

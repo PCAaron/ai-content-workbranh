@@ -20,3 +20,4 @@ from desk import channels
 urlpatterns += [path('api/drafts/<int:pk>/compile',channels.compile_edition),path('api/drafts/<int:pk>/editions',channels.editions),path('api/editions/<int:pk>/save',channels.edit),path('api/editions/<int:pk>/approve',channels.accept),path('api/editions/<int:pk>/download',channels.download),path('api/editions/<int:pk>/deliver',channels.deliver),path('api/deliveries',channels.deliveries),path('api/deliveries/<int:pk>/reconcile',channels.reconcile)]
 from desk import learning
 urlpatterns += [path('api/learning',learning.overview),path('api/learning/examples/<int:pk>',learning.suggest),path('api/rules',learning.propose),path('api/rules/<int:pk>/evaluate',learning.evaluate),path('api/rules/<int:pk>/activate',learning.activate),path('api/rules/<int:pk>/rollback',learning.rollback)]
+urlpatterns.append(path('api/overview',editorial.overview))

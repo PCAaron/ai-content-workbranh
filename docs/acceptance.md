@@ -32,3 +32,18 @@ Linux、Python 3.12.14、Django 5.2.19、PostgreSQL 16.2、Node 24.22.3、Chromi
 | 星球、小红书原生导入 | MANUAL REVIEW。文件导出已验证，实际设备和账号排版仍需核验 |
 | agent-autoloop/Hermes 原生集成 | NOT RUN。当前借鉴其运行及学习机制，使用自研持久 worker、回执和文风评测 |
 | 实际生产域名、Windows 原生使用、容量与灾备 | NOT RUN。生产部署由部署者实施；按业务峰值进行压测、告警和灾备演练 |
+
+## 02b 主题发现增量验收 · 2026-11-20
+
+对应[主题发现规格](specs/02b-discovery.md)、[实现前设计审核](reviews/discovery.md)与[含回归用例的提交](https://github.com/PCAaron/ai-content-workbranh/commit/a249ceb02d0248cbc552b18323e1981b9cbedb99)。
+
+| 项目 | 状态与观察 |
+|---|---|
+| React 生产构建、Django 系统检查及迁移差异检查 | PASS。构建成功，无系统检查问题，无待生成迁移 |
+| SQLite 后端 | PASS。33 项中 31 项通过，2 项并发测试仅在 PostgreSQL 运行 |
+| PostgreSQL 18.7 本机隔离库 | PASS。33 项后端及 2 项 Chromium 验收全部通过；两路并发发起同一请求，仅调用一次供应商，另一路获 409 |
+| 小屏编辑路径 | PASS。依次检索 X 和公众号，查看统计、点击公众号原文、填写核实节选并检查来源库。模拟异常响应后旧结果被清除。测试的上游响应和原文页面为合成数据 |
+| 既有浏览器稿件流程 | 首次 SQLite 全套测试在等待“审核渠道稿”时超时。同一构建单独复跑和 SQLite 两项整套复跑通过；PostgreSQL 两项整套通过。首次超时的原因未确认 |
+| 使用部署者真实密钥，验证权限、费用、微信索引覆盖 | NOT RUN。验收环境未提供 X 或 Brave 服务密钥。生产采集质量及费用需以部署账户实际结果核对 |
+
+[GitHub Actions 代码验收记录](https://github.com/PCAaron/ai-content-workbranh/actions/runs/44704667711)包含独立环境的 PostgreSQL 16、SQLite、React 构建和 Chromium 验收步骤。

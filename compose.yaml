@@ -1,0 +1,46 @@
+name: folio-desk
+
+x-app: &app
+  image: folio-desk:local
+  pull_policy: never
+  init: true
+  volumes:
+    - newsroom:/app/state
+
+services:
+  web:
+    <<: *app
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      - PRESS_FEEDS
+      - PRESS_X_ACCOUNTS
+      - PRESS_X_READ_TOKEN
+      - PRESS_BRAVE_SEARCH_KEY
+      - PRESS_X_DRAFT_TOKEN
+      - PRESS_WX_APP_ID
+      - PRESS_WX_SECRET
+      - PRESS_WX_COVER_ID
+      - PRESS_MODEL_URL
+      - PRESS_MODEL
+      - PRESS_MODEL_KEY
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; assert u.urlopen('http://127.0.0.1:8000/health/ready', timeout=3).status == 200"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+  worker:
+    <<: *app
+    command: ["worker"]
+    depends_on:
+      web:
+        condition: service_healthy
+    environment:
+      - PRESS_MODEL_URL
+      - PRESS_MODEL
+      - PRESS_MODEL_KEY
+
+volumes:
+  newsroom:

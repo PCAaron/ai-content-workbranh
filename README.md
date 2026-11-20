@@ -4,7 +4,22 @@
 
 [参考项目的迭代过程](docs/research/decisions.md) · [架构](docs/architecture.md) · [模块 Spec](docs/specs) · [设计审核](docs/reviews) · [部署与恢复手册](docs/deploy.md) · [验收记录](docs/acceptance.md)
 
-## 本机启动
+## 一键启动
+
+本机先安装并打开带 Compose V2 的 Docker（Windows 用 Docker Desktop 的 Linux 容器模式）。下载或克隆本仓库，解压后打开项目文件夹。主机无需安装 Python、Node 或中文字体。
+
+| 系统 | 启动方式 |
+|---|---|
+| Windows | 双击根目录 **start.cmd**。启动完成后自动打开浏览器。 |
+| macOS / Linux | 在项目根目录运行 `sh start.sh`，打开 http://127.0.0.1:8000/ 。 |
+
+首次启动联网下载依赖并构建，随后在弹出的终端设置登录名（直接回车默认 chief）和至少 12 位的密码；输入密码时屏幕不显示字符。后续用相同入口启动即可。Web 与模型 worker 一起启动，无外部密钥即可体验人工编辑和四端文件导出。
+
+关闭浏览器后服务仍在后台。要停止，在项目根目录运行 `docker compose down`。账号、素材和草稿保存在 Docker 命名卷中，下次启动继续使用。保留数据时请勿添加 `-v`。已有原生 Python 实例的数据库独立保存，这个入口首次会开一个新库。
+
+需要检索或调用模型时，将对应的 PRESS_X_READ_TOKEN、PRESS_BRAVE_SEARCH_KEY 或三项 PRESS_MODEL 配置填写到根目录本地 .env，重新启动即可。变量名见 [.env.example](.env.example)。如 8000 端口已被占用，先停止占用该端口的实例，再重试启动。容器或下载报错可运行 `docker compose logs --tail=60 web worker` 查看服务日志。本机入口只监听回环地址；生产服务器沿用 [Python 部署手册](docs/deploy.md)。
+
+## 原生 Python 启动（可选）
 
 准备 Python 3.12、Node 24、npm，以及可用于图卡的中文字体。在仓库根目录执行：
 
@@ -36,7 +51,7 @@ python manage.py runserver 127.0.0.1:8000
 | 知识星球 | Markdown | 人工导入目标星球 |
 | 小红书 | 配文、来源、可编辑图卡 JSON、1080×1440 PNG 组成的 ZIP | 在原生 App 内确认顺序与排版 |
 
-无外部凭证可走通人工写作、审核和文件导出。启用模型后，在第二个终端加载与 Web 相同的环境，运行 `python manage.py worker`。模型和平台令牌只配置在服务端。
+原生 Python 启动且启用模型时，在第二个终端加载与 Web 相同的环境，运行 `python manage.py worker`。模型和平台令牌只配置在服务端。
 
 ## 可复现检查
 

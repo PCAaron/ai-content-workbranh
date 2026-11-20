@@ -11,6 +11,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from .editorial import check_body,evidence,revise
 from .http import Problem,audit,endpoint,number
 from .models import Attempt,Draft,Job
+from .learning import apply_rules,current_rules
 
 
 def model_config():
@@ -20,10 +21,6 @@ def model_config():
     if not url or urlsplit(url).scheme!="https" or not key or not model:
         raise Problem("模型未配置，请使用人工起稿或配置 HTTPS 模型端点",503)
     return url,key,model
-
-
-def current_rules():
-    return []
 
 
 @endpoint("POST")
@@ -74,10 +71,6 @@ def recover():
         for job in stale:
             job.attempts.filter(state="calling").update(state="unknown")
             finish(job,"unknown","调用中断，请核对服务商回执")
-
-
-def apply_rules(body,inputs):
-    return body
 
 
 def step():

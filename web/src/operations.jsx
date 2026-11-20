@@ -14,8 +14,8 @@ import {
 
 export function Operations() {
   const { stamp, run, reviewer, refresh } = useApp(),
-    [tab, T] = useState("jobs"),
-    [receipt, R] = useState(null);
+    [tab, setTab] = useState("jobs"),
+    [receipt, setReceipt] = useState(null);
   const list = useLoad(tab, stamp);
   return (
     <>
@@ -37,8 +37,8 @@ export function Operations() {
             key={k}
             aria-pressed={tab === k}
             onClick={() => {
-              T(k);
-              R(null);
+              setTab(k);
+              setReceipt(null);
             }}
           >
             {n}
@@ -72,7 +72,7 @@ export function Operations() {
                       <Btn
                         secondary
                         onClick={() =>
-                          run(async () => R(await api("jobs/" + r.id)))
+                          run(async () => setReceipt(await api("jobs/" + r.id)))
                         }
                       >
                         查看回执
@@ -170,10 +170,10 @@ export function Learning() {
 }
 function Candidate({ d }) {
   const { run } = useApp(),
-    [id, I] = useState(""),
-    [old, A] = useState(""),
-    [next, B] = useState(""),
-    [sample, S] = useState(null);
+    [id, setId] = useState(""),
+    [old, setOld] = useState(""),
+    [next, setNext] = useState(""),
+    [sample, setSample] = useState(null);
   return (
     <>
       <h2>从改稿提取候选</h2>
@@ -181,10 +181,10 @@ function Candidate({ d }) {
         <select
           value={id}
           onChange={(e) => {
-            I(e.target.value);
-            S(null);
-            A("");
-            B("");
+            setId(e.target.value);
+            setSample(null);
+            setOld("");
+            setNext("");
           }}
         >
           <option value="">选择人工修订</option>
@@ -201,9 +201,9 @@ function Candidate({ d }) {
         onClick={() =>
           run(async () => {
             const s = await api("learning/examples/" + id);
-            S(s);
-            A(s.options[0]?.old || "");
-            B(s.options[0]?.new || "");
+            setSample(s);
+            setOld(s.options[0]?.old || "");
+            setNext(s.options[0]?.new || "");
           })
         }
       >
@@ -219,10 +219,10 @@ function Candidate({ d }) {
             <pre className="prose">{sample.after}</pre>
           </details>
           <Field label="原措辞">
-            <input value={old} onChange={(e) => A(e.target.value)} />
+            <input value={old} onChange={(e) => setOld(e.target.value)} />
           </Field>
           <Field label="新措辞">
-            <input value={next} onChange={(e) => B(e.target.value)} />
+            <input value={next} onChange={(e) => setNext(e.target.value)} />
           </Field>
           <Btn
             disabled={!old || !next}
@@ -242,7 +242,7 @@ function Candidate({ d }) {
 }
 function Rule({ r, d }) {
   const { run, reviewer } = useApp(),
-    [ids, I] = useState([]);
+    [ids, setIds] = useState([]);
   return (
     <div className="item">
       <div className="section-head">
@@ -259,7 +259,7 @@ function Rule({ r, d }) {
               multiple
               value={ids}
               onChange={(e) =>
-                I([...e.target.selectedOptions].map((o) => o.value))
+                setIds([...e.target.selectedOptions].map((o) => o.value))
               }
             >
               {d.pairs

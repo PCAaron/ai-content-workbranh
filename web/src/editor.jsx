@@ -15,19 +15,22 @@ import {
 } from "./ui";
 
 export function Manuscripts() {
-  const { stamp } = useApp(),
-    rec = useLoad("drafts", stamp);
+  const { stamp } = useApp();
+  const [before, setBefore] = useState(0);
+  const rec = useLoad("drafts" + (before ? "?before=" + before : ""), stamp);
   return (
     <>
       <Header
         title="稿件工作区"
         desc="从确认过的选题起稿。母稿、修订与渠道版本在此留存。"
       />
+      {before > 0 && <button onClick={() => setBefore(0)}>返回最新稿件</button>}
       <section className="panel">
         <Load record={rec}>
           {(rows) =>
             rows.length ? (
-              rows.map((x) => (
+              <>
+                {rows.map((x) => (
                 <a key={x.id} href={"#draft/" + x.id} className="row">
                   <div>
                     <small>母稿 #{x.id}</small>
@@ -37,7 +40,11 @@ export function Manuscripts() {
                     {x.approved ? "审核通过" : x.version ? "待审核" : "待起稿"}
                   </Pill>
                 </a>
-              ))
+                ))}
+                {rows.length === 60 && (
+                  <button onClick={() => setBefore(rows.at(-1).id)}>更早稿件</button>
+                )}
+              </>
             ) : (
               <Empty title="尚无稿件">
                 <a href="#library">前往素材与选题 →</a>
@@ -52,7 +59,7 @@ export function Manuscripts() {
 export function Editor({ id }) {
   const { stamp } = useApp(),
     rec = useLoad("drafts/" + id, stamp);
-  const [tab, T] = useState("write");
+  const [tab, setTab] = useState("write");
   return (
     <Load record={rec}>
       {(d) => (
@@ -75,7 +82,7 @@ export function Editor({ id }) {
               ["channels", "渠道稿件"],
               ["history", "修订与批注"],
             ].map(([k, n]) => (
-              <button key={k} aria-pressed={tab === k} onClick={() => T(k)}>
+              <button key={k} aria-pressed={tab === k} onClick={() => setTab(k)}>
                 {n}
               </button>
             ))}
@@ -108,10 +115,10 @@ function Sample({ d, value, set }) {
 }
 function Write({ d }) {
   const { reviewer, run } = useApp(),
-    [body, B] = useState(d.body),
-    [reason, R] = useState(""),
-    [budget, V] = useState(1),
-    [sample, S] = useState(0);
+    [body, setBody] = useState(d.body),
+    [reason, setReason] = useState(""),
+    [budget, setBudget] = useState(1),
+    [sample, setSample] = useState(0);
   return (
     <div className="columns writing">
       <section className="panel">
@@ -139,7 +146,7 @@ function Write({ d }) {
             <textarea
               className="manuscript"
               value={body}
-              onChange={(e) => B(e.target.value)}
+              onChange={(e) => setBody(e.target.value)}
               required
               maxLength={40000}
               placeholder="写下第一段，使用 [S编号] 标注事实出处。"
@@ -149,7 +156,7 @@ function Write({ d }) {
             <input
               required
               value={reason}
-              onChange={(e) => R(e.target.value)}
+              onChange={(e) => setReason(e.target.value)}
               maxLength={500}
             />
           </Field>
@@ -177,9 +184,9 @@ function Write({ d }) {
         </form>
         <details className="inset">
           <summary>用模型起稿或按批注改写</summary>
-          <Sample d={d} value={sample} set={S} />
+          <Sample d={d} value={sample} set={setSample} />
           <Field label="本次最多调用模型">
-            <select value={budget} onChange={(e) => V(Number(e.target.value))}>
+            <select value={budget} onChange={(e) => setBudget(Number(e.target.value))}>
               <option value="1">1 次</option>
               <option value="2">2 次（校验失败后允许修订一次）</option>
             </select>
@@ -245,7 +252,7 @@ function Write({ d }) {
 }
 function HistoryPane({ d }) {
   const { run } = useApp(),
-    [old, O] = useState(null);
+    [old, setOld] = useState(null);
   return (
     <div className="columns">
       <section className="panel">
@@ -263,7 +270,7 @@ function HistoryPane({ d }) {
                 secondary
                 onClick={() =>
                   run(async () =>
-                    O(await api("drafts/" + d.id + "/versions/" + r.version)),
+                    setOld(await api("drafts/" + d.id + "/versions/" + r.version)),
                   )
                 }
               >
@@ -329,7 +336,7 @@ function HistoryPane({ d }) {
 }
 function Channels({ d }) {
   const { run, stamp } = useApp(),
-    [key, K] = useState("wechat"),
+    [key, setKey] = useState("wechat"),
     record = useLoad("drafts/" + d.id + "/editions", stamp);
   return (
     <section className="panel">
@@ -339,7 +346,7 @@ function Channels({ d }) {
       </div>
       <div className="channel-tabs">
         {Object.entries(platformNames).map(([k, n]) => (
-          <button aria-pressed={key === k} key={k} onClick={() => K(k)}>
+          <button aria-pressed={key === k} key={k} onClick={() => setKey(k)}>
             {n}
           </button>
         ))}
@@ -378,11 +385,11 @@ function Channels({ d }) {
 }
 function Edition({ ed, d }) {
   const { run, reviewer } = useApp(),
-    [title, T] = useState(ed.title),
-    [body, B] = useState(ed.body),
-    [cards, C] = useState(ed.cards.join("\n---\n")),
-    [out, O] = useState(""),
-    [sample, S] = useState(0);
+    [title, setTitle] = useState(ed.title),
+    [body, setBody] = useState(ed.body),
+    [cards, setCards] = useState(ed.cards.join("\n---\n")),
+    [out, setOut] = useState(""),
+    [sample, setSample] = useState(0);
   const path = "editions/" + ed.id + "/",
     version = ed.version,
     dirty =
@@ -413,7 +420,7 @@ function Edition({ ed, d }) {
           <input
             required
             value={title}
-            onChange={(e) => T(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
             maxLength={ed.platform === "xhs" ? 20 : 300}
           />
         </Field>
@@ -421,7 +428,7 @@ function Edition({ ed, d }) {
           <textarea
             required
             value={body}
-            onChange={(e) => B(e.target.value)}
+            onChange={(e) => setBody(e.target.value)}
             rows={12}
           />
         </Field>
@@ -429,7 +436,7 @@ function Edition({ ed, d }) {
           <Field label="图卡文字（单独一行 --- 分卡）">
             <textarea
               value={cards}
-              onChange={(e) => C(e.target.value)}
+              onChange={(e) => setCards(e.target.value)}
               rows={6}
             />
           </Field>
@@ -452,7 +459,7 @@ function Edition({ ed, d }) {
       </form>
       <details className="inset">
         <summary>按平台风格用模型改写</summary>
-        <Sample d={d} value={sample} set={S} />
+        <Sample d={d} value={sample} set={setSample} />
         <Btn
           secondary
           disabled={dirty}
@@ -509,7 +516,7 @@ function Edition({ ed, d }) {
                       version,
                       consent: true,
                     });
-                    O(stateNames[r.state] + " " + (r.remote_id || r.detail));
+                    setOut(stateNames[r.state] + " " + (r.remote_id || r.detail));
                   });
               }}
             >

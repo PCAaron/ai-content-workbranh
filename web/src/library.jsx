@@ -17,10 +17,10 @@ import {
 
 export function Library() {
   const { stamp } = useApp(),
-    [tab, T] = useState("sources"),
-    [text, S] = useState(""),
-    [q, Q] = useState(""),
-    [before, B] = useState(0);
+    [tab, setTab] = useState("sources"),
+    [text, setText] = useState(""),
+    [q, setQ] = useState(""),
+    [before, setBefore] = useState(0);
   const record = useLoad(
     "library?q=" + encodeURIComponent(q) + (before ? "&before=" + before : ""),
     stamp,
@@ -41,10 +41,10 @@ export function Library() {
             key={key}
             aria-pressed={tab === key}
             onClick={() => {
-              T(key);
-              B(0);
-              Q("");
-              S("");
+              setTab(key);
+              setBefore(0);
+              setQ("");
+              setText("");
             }}
           >
             {label}
@@ -60,15 +60,15 @@ export function Library() {
                   className="search"
                   onSubmit={(e) => {
                     e.preventDefault();
-                    Q(text);
-                    B(0);
+                    setQ(text);
+                    setBefore(0);
                   }}
                 >
                   <Search size={17} />
                   <input
                     aria-label="搜索材料或标题"
                     value={text}
-                    onChange={(e) => S(e.target.value)}
+                    onChange={(e) => setText(e.target.value)}
                     placeholder="搜索材料或标题"
                   />
                   <button>搜索</button>
@@ -104,9 +104,9 @@ export function Library() {
                   ))
                 )}
                 <div className="actions">
-                  {before > 0 && <button onClick={() => B(0)}>返回最新</button>}
+                  {before > 0 && <button onClick={() => setBefore(0)}>返回最新</button>}
                   {d[tab].length === 60 && (
-                    <button onClick={() => B(d[tab].at(-1).id)}>
+                    <button onClick={() => setBefore(d[tab].at(-1).id)}>
                       更早记录
                     </button>
                   )}
@@ -144,8 +144,8 @@ function Topic({ item }) {
 function Form({ tab, entries }) {
   const { run, user } = useApp();
   const list = useLoad("library");
-  const [feed, F] = useState("");
-  const [pull, P] = useState("");
+  const [feed, setFeed] = useState("");
+  const [pull, setPull] = useState("");
   const submit = (e) => {
     const form = e.currentTarget,
       d = dataOf(e);
@@ -264,7 +264,7 @@ function Form({ tab, entries }) {
         <div className="inset">
           <h3>拉取订阅</h3>
           <Field label="已配置的信源">
-            <select value={feed} onChange={(e) => F(e.target.value)}>
+            <select value={feed} onChange={(e) => setFeed(e.target.value)}>
               <option value="">请选择</option>
               {entries.feeds.map((f) => (
                 <option key={f}>{f}</option>
@@ -276,7 +276,7 @@ function Form({ tab, entries }) {
             onClick={() =>
               run(async () => {
                 const r = await api("pull", { name: feed });
-                P(
+                setPull(
                   "本轮新增 " +
                     r.added +
                     " 条" +

@@ -15,9 +15,11 @@ class Command(BaseCommand):
         reviewers = users.filter(is_active=True).filter(
             Q(is_superuser=True) | Q(groups__name="reviewer")
         )
-        if reviewers.exclude(password="").exclude(
-            password__startswith=UNUSABLE_PASSWORD_PREFIX
-        ).exists():
+        if (
+            reviewers.exclude(password="")
+            .exclude(password__startswith=UNUSABLE_PASSWORD_PREFIX)
+            .exists()
+        ):
             self.stdout.write("已有可用审核账号，可直接登录。")
             return
         if not sys.stdin.isatty():

@@ -32,3 +32,13 @@ class Cursor(models.Model):
     pending = models.CharField(max_length=128, blank=True)
     token = models.TextField(blank=True)
     version = models.PositiveIntegerField(default=0)
+
+
+class DiscoveryRun(models.Model):
+    request_id = models.UUIDField(primary_key=True)
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    platform = models.CharField(max_length=10)
+    limit = models.PositiveSmallIntegerField()
+    started = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, default="pending")
+    count = models.PositiveSmallIntegerField(null=True)

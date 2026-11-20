@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Plus, Quote as QuoteIcon, Search } from "lucide-react";
+import { Discovery } from "./discovery";
 import { api } from "./api";
 import {
   Header,
@@ -34,6 +35,7 @@ export function Library() {
       <div className="tabs">
         {[
           ["sources", "来源材料"],
+          ["discovery", "主题发现"],
           ["quotes", "本人原话"],
           ["topics", "选题池"],
         ].map(([key, label]) => (
@@ -51,7 +53,7 @@ export function Library() {
           </button>
         ))}
       </div>
-      <Load record={record}>
+      {tab === "discovery" ? <Discovery /> : <Load record={record}>
         {(d) => (
           <>
             <div className="columns">
@@ -118,7 +120,7 @@ export function Library() {
             </div>
           </>
         )}
-      </Load>
+      </Load>}
     </>
   );
 }

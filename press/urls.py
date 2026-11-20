@@ -2,7 +2,7 @@ from django.conf import settings
 from django.http import FileResponse, HttpResponse
 from django.urls import path
 
-from desk import auth, channels, editorial, intake, learning, runner
+from desk import auth, channels, discovery, editorial, intake, learning, runner
 
 
 def index(request):
@@ -28,6 +28,8 @@ urlpatterns += [
     path("api/quotes", intake.add_quote),
     path("api/topics", intake.add_topic),
     path("api/pull", intake.pull),
+    path("api/discovery/search", discovery.search),
+    path("api/discovery/capture", discovery.capture),
 ]
 urlpatterns += [
     path("api/drafts", editorial.drafts),

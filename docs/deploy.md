@@ -98,3 +98,18 @@ PGDATABASE=folio_restore_check python manage.py migrate --check
 当前默认共享一个编辑部，未内置组织 SSO、多租户或集群级预算。现场容量、灾备、真实模型质量、渠道权限和发布责任见 [验收记录](acceptance.md)。
 
 参考：[Django 部署核对](https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/) · [PostgreSQL 备份](https://www.postgresql.org/docs/16/app-pgdump.html) · [X 近期搜索](https://docs.x.com/x-api/posts/search/quickstart/recent-search) · [X Articles 草稿](https://docs.x.com/x-api/articles/create-draft-article) · [公众号草稿](https://developers.weixin.qq.com/doc/offiaccount/Draft_Box/Add_draft.html)。
+
+## 跨账号主题发现
+
+部署端应用 0007 迁移（python manage.py migrate），构建 React 并重新加载 Web 进程。两个检索服务可独立启用；此功能由编辑在网页中手动触发，无需运行 worker。
+
+| 平台 | Web 进程变量 | 服务与权限 | 一次检索 |
+|---|---|---|---|
+| X | PRESS_X_READ_TOKEN | 可使用 X API v2 recent search 的 Bearer Token，账号须有可用额度 | 请求 api.x.com 一页，近七天，按最新抓取 10/20/50 条以内，再在样本内按公开互动排序 |
+| 微信公众号公开文章 | PRESS_BRAVE_SEARCH_KEY | Brave Web Search 订阅密钥；检索目标为 mp.weixin.qq.com，搜索语言为简体中文 | 请求 api.search.brave.com 一页，上限 10/20；近一周筛选使用索引判断的页面年龄，可能取自发布或更新时间 |
+
+服务按各自的账户方案计费。按主题检索无需配置 PRESS_X_ACCOUNTS、PRESS_FEEDS 或公众号投递凭证。部署方可在供应商控制台核对权限、额度及其数据使用条件。密钥只在服务端读取，浏览器使用同源会话。
+
+在「素材与选题 → 主题发现」输入一个公开话题。可对照 X 原帖查看采样时刻的互动字段；数值随后可能变化。公众号可点击原文，核对标题并填写可引用节选。该平台的网页检索摘要只在本轮预览中出现。样本可能少于上限或为空；微信端的阅读、点赞和全平台覆盖率均未知。
+
+预览入库凭据有效期为 30 分钟。每次检索在 desk_discoveryrun 留下请求号、操作者、时间、平台、上限及处理结果。同一请求号重放返回 409。进程中断可能留下 pending，可按采样时间核对供应商用量后由编辑决定是否发起新检索。接口不自动重试或翻页。

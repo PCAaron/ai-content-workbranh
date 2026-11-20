@@ -116,3 +116,32 @@ class WritingTests(DeskCase):
             self.assertTrue(step())
             self.assertFalse(step())
         self.assertEqual(Job.objects.get().state, "failed")
+
+    def test_model_http_contract_and_feedback(self):
+        import json
+
+        calls = []
+
+        def provider(request):
+            self.assertEqual(request.url.path, "/chat")
+            self.assertEqual(request.headers["Authorization"], "Bearer fixture")
+            calls.append(json.loads(request.content))
+            content = self.body if len(calls) == 2 else "正文缺少证据"
+            return httpx.Response(
+                200, json={"choices": [{"message": {"content": content}}]}
+            )
+
+        client = httpx.Client
+
+        def transport(**options):
+            return client(transport=httpx.MockTransport(provider), **options)
+
+        self.submit()
+        with patch("desk.runner.httpx.Client", side_effect=transport):
+            step()
+            step()
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(calls[0]["model"], "fixture")
+        self.assertIn(self.quote.text, calls[0]["messages"][1]["content"])
+        self.assertIn("原话", calls[1]["messages"][-1]["content"])
+        self.assertEqual(Job.objects.get().state, "done")

@@ -12,3 +12,5 @@ urlpatterns = [
     path("api/session",auth.session), path("api/login",auth.sign_in), path("api/logout",auth.sign_out),
     path("api/audit",auth.events),
 ]
+from desk import intake
+urlpatterns += [path('api/library',intake.library),path('api/sources',intake.add_source),path('api/quotes',intake.add_quote),path('api/topics',intake.add_topic),path('api/pull',intake.pull)]

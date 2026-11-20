@@ -21,3 +21,4 @@ urlpatterns += [path('api/drafts/<int:pk>/compile',channels.compile_edition),pat
 from desk import learning
 urlpatterns += [path('api/learning',learning.overview),path('api/learning/examples/<int:pk>',learning.suggest),path('api/rules',learning.propose),path('api/rules/<int:pk>/evaluate',learning.evaluate),path('api/rules/<int:pk>/activate',learning.activate),path('api/rules/<int:pk>/rollback',learning.rollback)]
 urlpatterns.append(path('api/overview',editorial.overview))
+urlpatterns.append(path("api/editions/<int:pk>/generate",runner.enqueue,{"channel":True}))

@@ -51,6 +51,7 @@ def detail(request,data,pk):
     revisions=list(draft.revisions.order_by("-version").values("id","version","actor","reason","at"))
     return {"id":pk,"version":draft.version,"approved":draft.approved,"evidence":evidence(draft.topic),
             "body":draft.revisions.filter(version=draft.version).values_list("body",flat=True).first() or "",
+            "samples":list(Draft.objects.filter(topic__quote__author_id=draft.topic.quote.author_id,approved__isnull=False).exclude(pk=pk).order_by("-pk").values("id","topic__title")[:60]),
             "revisions":revisions,"notes":list(Note.objects.filter(revision__draft=draft).order_by("-id").values("anchor","text","revision__version","actor")),
             "jobs":list(Job.objects.filter(draft=draft).order_by("-id").values("id","state","detail","base","budget","model","updated"))}
 

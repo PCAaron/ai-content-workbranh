@@ -32,6 +32,8 @@ class Note(models.Model):
 class Job(models.Model):
     draft = models.ForeignKey(Draft,on_delete=models.PROTECT)
     base = models.PositiveIntegerField()
+    edition = models.ForeignKey("desk.Edition",null=True,on_delete=models.PROTECT)
+    edition_version = models.PositiveIntegerField(default=0)
     budget = models.PositiveSmallIntegerField()
     inputs = models.JSONField()
     model = models.CharField(max_length=160)
@@ -41,7 +43,7 @@ class Job(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        constraints=[models.UniqueConstraint(fields=["draft","base"],name="one_job_per_base")]
+        constraints=[models.UniqueConstraint(fields=["draft","base"],condition=models.Q(edition__isnull=True),name="one_manuscript_job"),models.UniqueConstraint(fields=["edition","edition_version"],condition=models.Q(edition__isnull=False),name="one_edition_job")]
 
 
 class Attempt(models.Model):
